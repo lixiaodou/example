@@ -214,3 +214,87 @@ app.get('/', (req, res) => {
   `)
 })
 ```
+### 路由
+路由配置文件
+```js
+// src/routes/index.js
+import React from 'react'
+import { Route } from 'react-router-dom'
+import Home from '../pages/Home'
+import Login from '../pages/Login'
+
+export default (
+  <div>
+    <Route path='/' exact component={Home}></Route>
+    <Route path='/login' exact component={Login}></Route>
+  </div>
+)
+
+```
+客服端部分
+```js
+// src/clients/index.js
+import React from 'react'
+import ReactDom from 'react-dom'
+import { BrowserRouter } from 'react-router-dom'
+
+import Routes from '../routes/index'
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      {Routes}
+    </BrowserRouter>
+  )
+}
+
+ReactDom.hydrate(<App />, document.getElementById('root'))
+
+```
+服务端部分
+```js
+// src/server/app.js
+import express from 'express'
+
+import { render } from './utils'
+
+const PORT = 3001
+const app = express()
+
+app.use(express.static('public'))
+
+app.get('*', function (req, res) {
+  res.send(render(req))
+})
+
+app.listen(PORT, () => {
+  console.log(`listen: ${PORT}`)
+})
+
+// src/server/utils.js
+import React from 'react'
+import { renderToString } from 'react-dom/server'
+import { StaticRouter } from 'react-router-dom'
+
+import Routes from '../routes/index'
+
+export const render = (req) => {
+  const content = renderToString(
+    <StaticRouter location={req.path} >
+      {Routes}
+    </StaticRouter>
+  )
+  return `
+    <html>
+      <head>
+        <title>ssr</title>
+      </head>
+      <body>
+        <div id="root">${content}</div>
+        <script src="main.js"></script>
+      </body>
+    </html>
+  `
+}
+
+```

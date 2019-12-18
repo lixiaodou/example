@@ -1,29 +1,14 @@
 import express from 'express'
-import React from 'react'
-import { renderToString } from 'react-dom/server'
 
-import Home from '../pages/Home'
+import { render } from './utils'
 
 const PORT = 3001
 const app = express()
-const home = renderToString(<Home />)
 
 app.use(express.static('public'))
 
-app.get('/', (req, res) => {
-  res.send(`
-  <html>
-     <head>
-       <title>hello</title>
-     </head>
-     <body>
-       <h1>hello</h1>
-       <p>world</p>
-       <div id="root">${home}</div>
-       <script src="main.js"></script>
-     </body>
-   </html>
-  `)
+app.get('*', function (req, res) {
+  res.send(render(req))
 })
 
 app.listen(PORT, () => {
