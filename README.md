@@ -131,4 +131,86 @@ app.listen(PORT, () => {
 ```
 
 ## 认识同构
-前面的SSR是不完整的，开发过程中肯定少不了一些事件的绑定
+前面的SSR是不完整的，开发过程中肯定少不了一些事件的绑定，添加一个button
+```js
+// src/pages/Home.js
+import React from 'react'
+
+const Home = () => {
+  return <div>
+    This is Home
+    <button onClick={() => { alert('this is home button') }}>click</button>
+  </div>
+}
+
+export default Home
+
+```
+试一下上面的代码，是不是发现事件绑定无效呢？这是因为`renderToString`并没有做事件相关的处理，因此返回给浏览器的内容不会有事件绑定。
+
+这就需要进行同构了。所谓同构，通俗的讲，就是一套React代码再服务器上运行一遍，在浏览器又运行一遍。服务端渲染完成页面结构，浏览器端渲染完成事件驱动。
+
+如何进行浏览器端的事件绑定呢？唯一的方法就是让浏览器去拉去JS文件执行，生成js文件
+```js
+// clients/index.js
+import React from 'react'
+import ReactDom from 'react-dom'
+import Home from '../pages/Home'
+
+ReactDom.hydrate(<Home />, document.getElementById('root'))
+```
+配置webpack，使用webpack将其打包
+```sh
+yarn add babel-loader webpack webpack-cli -D
+# 添加指令 "build:client": "webpack --watch"
+
+```
+```js
+// webpack.config.js
+const path = require('path')
+
+module.exports = {
+  mode: 'development',
+  entry: './src/client/index.js',
+  output: {
+    filename: 'main.js',
+    path: path.resolve(__dirname, 'public')
+  },
+  module: {
+    rules: [{
+      test: /\.js$/,
+      loader: 'babel-loader',
+      exclude: /node_modules/,
+      options: {
+        presets: ['@babel/preset-react', ['@babel/preset-env', {
+          targets: {
+            browsers: ['last 2 versions']
+          }
+        }]]
+      }
+    }]
+  }
+}
+
+```
+开启express的静态文件服务，并将返回前端的html字符串中添加js文件
+```js
+// src/server/app.js
+app.use(express.static('public'))
+
+app.get('/', (req, res) => {
+  res.send(`
+  <html>
+     <head>
+       <title>hello</title>
+     </head>
+     <body>
+       <h1>hello</h1>
+       <p>world</p>
+       <div id="root">${home}</div>
+       <script src="main.js"></script>
+     </body>
+   </html>
+  `)
+})
+```

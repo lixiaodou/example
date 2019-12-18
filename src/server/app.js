@@ -8,6 +8,8 @@ const PORT = 3001
 const app = express()
 const home = renderToString(<Home />)
 
+app.use(express.static('public'))
+
 app.get('/', (req, res) => {
   res.send(`
   <html>
@@ -18,6 +20,7 @@ app.get('/', (req, res) => {
        <h1>hello</h1>
        <p>world</p>
        <div id="root">${home}</div>
+       <script src="main.js"></script>
      </body>
    </html>
   `)
