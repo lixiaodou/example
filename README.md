@@ -298,3 +298,127 @@ export const render = (req) => {
 }
 
 ```
+### Redux
+1. 创建store
+```js
+// src/store/index.js
+import { combineReducers, createStore } from 'redux'
+import { home } from './home/reducer'
+
+export default createStore(combineReducers({ home }))
+
+// src/store/home/action.js
+export const ADD_ITEM = 'ADD_ITEM'
+
+export function addItem(item) {
+  return {
+    type: ADD_ITEM,
+    text: item
+  }
+}
+
+// src/store/home/reducer.js
+import { ADD_ITEM } from './action'
+
+export function home(state = ['default'], action) {
+  switch (action.type) {
+    case ADD_ITEM:
+      return [
+        ...state,
+        action.text
+      ]
+    default:
+      return state
+  }
+}
+
+```
+2. 全局store
+```js
+// src/clients/index.js
+import React from 'react'
+import ReactDom from 'react-dom'
+import { BrowserRouter } from 'react-router-dom'
+import { Provider } from 'react-redux'
+
+import store from '../store/index'
+import Routes from '../routes/index'
+
+const App = () => {
+  return (
+    <Provider store={store}>
+      <BrowserRouter>
+        {Routes}
+      </BrowserRouter>
+    </Provider>
+  )
+}
+
+ReactDom.hydrate(<App />, document.getElementById('root'))
+
+// src/routes/index.js
+import React from 'react'
+import { Route } from 'react-router-dom'
+import { Provider } from 'react-redux'
+
+import store from '../store/index'
+import Home from '../pages/Home'
+import Login from '../pages/Login'
+
+export default (
+  <Provider store={store}>
+    <div>
+      <Route path='/' exact component={Home}></Route>
+      <Route path='/login' exact component={Login}></Route>
+    </div>
+  </Provider>
+)
+
+```
+3. 连接store
+```js
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
+
+import { addItem } from '../store/home/action'
+
+const Home = ({ home, onAddNewHome }) => {
+  const [inputValue, setInputValue] = useState('')
+
+  const onChangeInput = () => {
+    setInputValue(event.target.value)
+  }
+  const addANew = () => {
+    onAddNewHome(inputValue)
+    setInputValue('')
+  }
+
+  return <div>
+    This is Home list
+    <ul>
+      {home.map((h, i) => {
+        return <li key={i}>{h}</li>
+      })}
+    </ul>
+    <input type="text" value={inputValue} onChange={onChangeInput} />
+    <button onClick={addANew}>add a new home</button>
+  </div>
+}
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    home: state.home
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onAddNewHome: val => {
+      dispatch(addItem(val))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home)
+
+```

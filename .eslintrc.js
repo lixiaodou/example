@@ -22,5 +22,7 @@ module.exports = {
     'react'
   ],
   rules: {
+    'space-before-function-paren': 0,
+    'react/prop-types': 0,
   }
 }
