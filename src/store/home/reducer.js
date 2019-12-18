@@ -1,4 +1,4 @@
-import { ADD_ITEM } from './action'
+import { ADD_ITEM, ADD_ITEMS } from './action'
 
 export function home(state = ['default'], action) {
   switch (action.type) {
@@ -6,6 +6,11 @@ export function home(state = ['default'], action) {
       return [
         ...state,
         action.text
+      ]
+    case ADD_ITEMS:
+      return [
+        ...state,
+        ...action.text
       ]
     default:
       return state

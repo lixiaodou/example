@@ -422,3 +422,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
 
 ```
+
+### 异步数据的服务端渲染

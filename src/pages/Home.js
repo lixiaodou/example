@@ -1,10 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
-import { addItem } from '../store/home/action'
+import { addItem, getHomeList } from '../store/home/action'
 
-const Home = ({ home, onAddNewHome }) => {
+const Home = ({ home, onAddNewHome, getHomeList }) => {
   const [inputValue, setInputValue] = useState('')
+
+  useEffect(() => {
+    console.log('--------------', home)
+    getHomeList()
+  }, [])
 
   const onChangeInput = () => {
     setInputValue(event.target.value)
@@ -32,12 +37,21 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onAddNewHome: val => {
-      dispatch(addItem(val))
-    }
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     getHomeList() {
+//       dispatch(getHomeList())
+//     }
+//   }
+// }
+
+const mapDispatchToProps = dispatch => ({
+  addItem() {
+    dispatch(addItem())
+  },
+  getHomeList() {
+    dispatch(getHomeList())
   }
-}
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
